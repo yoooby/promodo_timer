@@ -1,3 +1,3 @@
 # promodo_timer
 
-A new Flutter project.
+A simple promodo timer using riverpod flutter
