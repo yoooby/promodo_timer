@@ -13,7 +13,7 @@ double getResponsiveFontSize(BuildContext context, double baseFontSize) {
 }
 
 void main() {
-  runApp(const MainApp());
+  runApp(ProviderScope(child: const MainApp()));
 }
 
 class MainApp extends ConsumerWidget {
@@ -103,7 +103,11 @@ class TimeCard extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            time.buttonState == ButtonState.session ? "SESSION" : "BREAK",
+            time.buttonState == ButtonState.session
+                ? "SESSION"
+                : time.buttonState == ButtonState.breakTime
+                    ? "BREAK"
+                    : "PAUSED",
             style: TextStyle(fontSize: getResponsiveFontSize(context, 25)),
           ),
           Text(time.timeLeft,
@@ -217,7 +221,8 @@ class SmallCard extends ConsumerWidget {
                 ),
                 IconButton(
                   onPressed: () {
-                    // check if its negative
+                    // check if its aleardy running
+                    
                     ref.read(provider.notifier).state++;
                   },
                   icon: Icon(

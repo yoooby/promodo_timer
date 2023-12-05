@@ -36,7 +36,7 @@ class TimerNotifier extends StateNotifier<TimerModel> {
   Timer? _timer;
   final int _initialSessionDuration;
   final int _initialBreakDuration;
-  bool _isPaused = false;
+  bool _isPaused = true;
   int _sessionDuration;
   int _breakDuration;
   ButtonState _currentButtonState = ButtonState.session;
@@ -47,36 +47,36 @@ class TimerNotifier extends StateNotifier<TimerModel> {
         super(TimerModel(_initialSessionDuration * 60, null));
 
   void start() {
-    if (_timer != null && !_isPaused) {
+    if (_isPaused) {
+      _isPaused = false;
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (_isPaused) {
+          timer.cancel();
+          return;
+        }
+
+        if (_sessionDuration > 0) {
+          _sessionDuration--;
+          final displayTime = (_sessionDuration);
+          _currentButtonState = ButtonState.session;
+          state = TimerModel(displayTime, _currentButtonState);
+        } else if (_breakDuration > 0) {
+          _breakDuration--;
+          final displayTime = (_breakDuration);
+          _currentButtonState = ButtonState.breakTime;
+          state = TimerModel(displayTime, _currentButtonState);
+        } else {
+          _sessionDuration = _initialSessionDuration * 60;
+          _breakDuration = _initialBreakDuration * 60;
+          _currentButtonState = ButtonState.session;
+        }
+      });
+    } else {
       _isPaused = true;
+      _currentButtonState = ButtonState.paused;
       _timer?.cancel();
       state = TimerModel((_sessionDuration), _currentButtonState);
-      return;
     }
-
-    _isPaused = false;
-    _timer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_isPaused) {
-        timer.cancel();
-        return;
-      }
-
-      if (_sessionDuration > 0) {
-        _sessionDuration--;
-        final displayTime = (_sessionDuration);
-        _currentButtonState = ButtonState.session;
-        state = TimerModel(displayTime, _currentButtonState);
-      } else if (_breakDuration > 0) {
-        _breakDuration--;
-        final displayTime = (_breakDuration);
-        _currentButtonState = ButtonState.breakTime;
-        state = TimerModel(displayTime, _currentButtonState);
-      } else {
-        _sessionDuration = _initialSessionDuration * 60;
-        _breakDuration = _initialBreakDuration * 60;
-        _currentButtonState = ButtonState.session;
-      }
-    });
   }
 
   void togglePause() {
@@ -92,6 +92,8 @@ class TimerNotifier extends StateNotifier<TimerModel> {
     _timer?.cancel();
     _sessionDuration = _initialSessionDuration * 60;
     _breakDuration = _initialBreakDuration * 60;
-    state = TimerModel(_sessionDuration, ButtonState.session);
+    _isPaused = true;
+    _currentButtonState = ButtonState.paused;
+    state = TimerModel(_sessionDuration, _currentButtonState);
   }
 }
