@@ -206,6 +206,7 @@ class SmallCard extends ConsumerWidget {
                 IconButton(
                   onPressed: () {
                     if (timer > 0) {
+                      ref.read(timerProvider.notifier).reset();
                       ref.read(provider.notifier).state--;
                     }
                   },
@@ -221,8 +222,7 @@ class SmallCard extends ConsumerWidget {
                 ),
                 IconButton(
                   onPressed: () {
-                    // check if its aleardy running
-                    
+                    ref.read(timerProvider.notifier).reset();
                     ref.read(provider.notifier).state++;
                   },
                   icon: Icon(

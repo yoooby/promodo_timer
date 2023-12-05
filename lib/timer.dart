@@ -1,7 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum ButtonState {
@@ -17,7 +14,8 @@ final timerProvider = StateNotifierProvider<TimerNotifier, TimerModel>(
   (ref) {
     final sessionDuration = ref.watch(sessionDurationProvider);
     final breakDuration = ref.watch(breakDurationProvider);
-    return TimerNotifier(sessionDuration, breakDuration);
+    //
+    return TimerNotifier(sessionDuration, breakDuration)..reset();
   },
 );
 
@@ -33,7 +31,7 @@ class TimerModel {
 }
 
 class TimerNotifier extends StateNotifier<TimerModel> {
-  Timer? _timer;
+  Timer? timer;
   final int _initialSessionDuration;
   final int _initialBreakDuration;
   bool _isPaused = true;
@@ -49,7 +47,7 @@ class TimerNotifier extends StateNotifier<TimerModel> {
   void start() {
     if (_isPaused) {
       _isPaused = false;
-      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      timer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (_isPaused) {
           timer.cancel();
           return;
@@ -74,7 +72,7 @@ class TimerNotifier extends StateNotifier<TimerModel> {
     } else {
       _isPaused = true;
       _currentButtonState = ButtonState.paused;
-      _timer?.cancel();
+      timer?.cancel();
       state = TimerModel((_sessionDuration), _currentButtonState);
     }
   }
@@ -83,13 +81,13 @@ class TimerNotifier extends StateNotifier<TimerModel> {
     if (state.buttonState == ButtonState.paused) {
       start();
     } else {
-      _timer?.cancel();
+      timer?.cancel();
       state = TimerModel(state.seconds, ButtonState.paused);
     }
   }
 
   void reset() {
-    _timer?.cancel();
+    timer?.cancel();
     _sessionDuration = _initialSessionDuration * 60;
     _breakDuration = _initialBreakDuration * 60;
     _isPaused = true;
